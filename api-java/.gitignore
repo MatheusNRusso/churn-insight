@@ -1,0 +1,64 @@
+#############################
+# JAVA / MAVEN / SPRING BOOT
+#############################
+
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Exceções do Maven (seguro)
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Logs
+*.log
+
+#############################
+# IDEs
+#############################
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+*.ipr
+
+### VS Code ###
+.vscode/
+
+### Eclipse / STS ###
+.apt_generated/
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+#############################
+# ENV / SECRETS
+#############################
+
+.env
+.env.*
+*.local
+
+#############################
+# OS
+#############################
+
+.DS_Store
+Thumbs.db
+
+#############################
+# (Opcional) Proteção extra contra arquivos grandes
+# Mesmo não sendo responsabilidade da API Java
+#############################
+
+*.csv
+*.csv.*
+*.xlsx
+*.xls
+*.parquet
+*.pkl
+*.pickle
+*.joblib

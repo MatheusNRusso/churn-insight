@@ -1,0 +1,76 @@
+#############################
+# PYTHON
+#############################
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+#############################
+# VIRTUAL ENV / CONDA
+#############################
+
+venv/
+.venv/
+env/
+.conda/
+.env
+.env.*
+
+#############################
+# FASTAPI / LOGS
+#############################
+
+*.log
+
+#############################
+# JUPYTER / NOTEBOOKS
+#############################
+
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+*.ipynb_check*
+*.nbconvert.ipynb
+
+#############################
+# DATASETS (se surgirem no futuro)
+#############################
+
+*.csv
+*.csv.*
+*.xlsx
+*.xls
+*.parquet
+
+#############################
+# MODELOS DE ML
+#############################
+
+# ⚠️ decisão consciente:
+# os arquivos .pkl ESTÃO versionados neste projeto (MVP)
+# se futuramente quiser ignorar, descomente:
+# *.pkl
+
+#############################
+# IDEs
+#############################
+
+.vscode/
+.idea/
+*.iml
+
+#############################
+# OS
+#############################
+
+.DS_Store
+Thumbs.db
+
+# =====================================
+# ML artifacts (generated files)
+# =====================================
+*.pkl
+*.joblib
+*.onnx
+*.h5
