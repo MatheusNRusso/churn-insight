@@ -128,12 +128,6 @@ public class PredictionUtils {
         return scoreByAddon(streamingMovies, internetService);
     }
 
-    /**
-     * Regrinha geral para add-ons (serviços extras).
-     * - Se internetService == NONE => neutro (porque vira "No internet service")
-     * - Se tem add-on => reduz churn um pouco (cliente mais engajado)
-     * - Se não tem => aumenta churn um pouco
-     */
     private static double scoreByAddon(Boolean hasAddon, InternetService internetService) {
         if (internetService == null) return 0.0;
         if (internetService == InternetService.NONE) return 0.0;
