@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api")
@@ -22,14 +21,10 @@ public class PredictionController {
     @PostMapping("/predict")
     public ResponseEntity<PredictionResponseDto> predict(
             @Valid @RequestBody
-            CustomerInputDto input,
-            UriComponentsBuilder uriComponentsBuilder) {
+            CustomerInputDto input
+            ) {
 
         var prediction = predictionService.predict(input);
-        var uri = uriComponentsBuilder.path("/predict/{id}")
-                .buildAndExpand(prediction.id())
-                .toUri();
-
-        return ResponseEntity.created(uri).body(prediction);
+        return ResponseEntity.ok(prediction);
     }
 }

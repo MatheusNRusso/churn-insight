@@ -9,9 +9,7 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface PredictionMapper {
 
-    // Possibilidade de criar PredictionModel a partir do input:
     PredictionModel toModel(CustomerInputDto dto);
 
-    // Para enviar resposta da API:
     PredictionResponseDto toDto(PredictionModel model);
 }
