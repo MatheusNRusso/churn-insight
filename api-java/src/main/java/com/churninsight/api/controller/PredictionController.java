@@ -3,6 +3,7 @@ package com.churninsight.api.controller;
 import com.churninsight.api.dto.CustomerInputDto;
 import com.churninsight.api.dto.PredictionResponseDto;
 import com.churninsight.api.service.PredictionService;
+import com.churninsight.api.service.StatsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PredictionController {
 
     private final PredictionService predictionService;
+    private final StatsService statsService;
 
     @PostMapping("/predict")
     public ResponseEntity<PredictionResponseDto> predict(
@@ -24,7 +26,12 @@ public class PredictionController {
             CustomerInputDto input
             ) {
 
+//        statsService.markRequest();
+
         var prediction = predictionService.predict(input);
+
+//        statsService.markSuccess();
+
         return ResponseEntity.ok(prediction);
     }
 }
