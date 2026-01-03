@@ -142,6 +142,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiErrorResponse> handleBusiness(
+            BusinessException ex,
+            HttpServletRequest req
+    ) {
+        log.warn("Business error: {}", ex.getMessage());
+
+        ApiErrorResponse body = new ApiErrorResponse(
+                "https://api.local/errors/business",
+                "Business error",
+                ex.getStatus().value(),
+                ex.getMessage(),
+                req.getRequestURI(),
+                MDC.get(RequestIdFilter.MDC_KEY),
+                OffsetDateTime.now(),
+                List.of()
+        );
+
+        return ResponseEntity.status(ex.getStatus()).body(body);
+    }
+
+
     private boolean isApiRequest(HttpServletRequest req) {
         String path = req.getRequestURI();
         return path != null && path.startsWith("/api");

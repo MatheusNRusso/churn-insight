@@ -14,7 +14,6 @@ public class StatsService {
     private volatile OffsetDateTime lastRequestAt = null;
     private final AtomicLongArray counters = new AtomicLongArray(StatKey.values().length);
 
-    // Low level - increment all counters
     public void inc(StatKey key) {
         counters.incrementAndGet(key.ordinal());
     }
@@ -59,7 +58,6 @@ public class StatsService {
         );
     }
 
-    // helper para leitura (mantém o snapshot limpo)
     private long get(StatKey key) {
         return counters.get(key.ordinal());
     }
