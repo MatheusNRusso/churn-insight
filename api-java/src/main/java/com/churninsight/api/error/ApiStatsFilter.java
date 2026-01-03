@@ -24,13 +24,10 @@ public class ApiStatsFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
 
-        // só API
         if (!path.startsWith("/api")) return true;
 
-        // não deixar /api/stats contaminar as métricas
         if (path.equals("/api/stats")) return true;
 
-        // se você quiser também excluir docs:
         if (path.startsWith("/api-docs") || path.startsWith("/swagger-ui")) return true;
 
         return false;
@@ -43,13 +40,11 @@ public class ApiStatsFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // Conta a request mesmo se falhar em validação/JSON (porque isso acontece dentro da chain)
         statsService.markRequest();
 
         try {
             filterChain.doFilter(request, response);
         } finally {
-            // Conta sucesso do predict sem acoplar controller
             String path = request.getRequestURI();
             if (path.equals("/api/predict") && response.getStatus() >= 200 && response.getStatus() < 300) {
                 statsService.markSuccess();

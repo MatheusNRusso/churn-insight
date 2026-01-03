@@ -24,14 +24,10 @@ public class PredictionController {
     public ResponseEntity<PredictionResponseDto> predict(
             @Valid @RequestBody
             CustomerInputDto input
-            ) {
-
-//        statsService.markRequest();
+            )
+    {
 
         var prediction = predictionService.predict(input);
-
-//        statsService.markSuccess();
-
         return ResponseEntity.ok(prediction);
     }
 }
