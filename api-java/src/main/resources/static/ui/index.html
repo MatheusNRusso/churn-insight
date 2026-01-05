@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Churn Insight • API Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+<div class="container">
+    <h1>Churn Insight • API Dashboard</h1>
+    <div class="muted">Painel simples para testar Register/Login, fazer predição e visualizar métricas.</div>
+
+    <div class="card">
+        <div class="row">
+            <div class="grow-2">
+                <label>API Base URL</label>
+                <input id="baseUrl" placeholder="http://localhost:8080 (vazio = mesma origem)" />
+            </div>
+            <div class="grow-1">
+                <label>Token</label>
+                <input id="token" placeholder="Bearer token (preenchido no Login)" />
+            </div>
+            <div class="min-160 align-bottom">
+                <button class="secondary" id="btnClear">Limpar</button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" data-tab="register">Register</div>
+        <div class="tab" data-tab="login">Login</div>
+        <div class="tab" data-tab="predict">Predict</div>
+        <div class="tab" data-tab="stats">Stats</div>
+    </div>
+
+    <div class="panel">
+        <!-- Register -->
+        <div class="card tab-panel" id="tab-register">
+            <h3>Register</h3>
+            <label>Email</label>
+            <input id="regEmail" value="exemplo@teste.com" />
+            <label>Password</label>
+            <input id="regPass" type="password" value="123456" />
+            <label>Name</label>
+            <input id="regName" value="Exemplar" />
+
+            <div class="mt-14">
+                <button class="primary" id="btnRegister">Registrar</button>
+            </div>
+
+            <div class="muted warn mt-10"></div>
+        </div>
+
+        <!-- Login -->
+        <div class="card tab-panel hidden" id="tab-login">
+            <h3>Login</h3>
+            <label>Email</label>
+            <input id="logEmail" value="exemplo@teste.com" />
+            <label>Password</label>
+            <input id="logPass" type="password" value="123456" />
+
+            <div class="mt-14 inline">
+                <button class="primary" id="btnLogin">Login</button>
+                <button class="secondary hidden" id="btnPasteToken" type="button">Usar token salvo</button>
+            </div>
+
+            <div class="muted mt-10"></div>
+        </div>
+
+        <!-- Predict (Swagger-like) -->
+        <div class="card tab-panel hidden" id="tab-predict">
+            <h3>prediction-controller</h3>
+
+            <div class="op">
+                <div class="op-header">
+                    <span class="op-method post">POST</span>
+                    <span class="op-path" id="predictPathLabel">/api/predict</span>
+                    <span class="op-tag">Generated server url</span>
+                </div>
+
+                <div class="op-body">
+                    <div class="section-title">Servers</div>
+                    <div class="server-row">
+                        <span class="server-url" id="serverLabel">http://localhost:8080</span>
+                    </div>
+
+                    <div class="hr"></div>
+
+                    <div class="section-title">Request body</div>
+                    <div class="small">application/json</div>
+
+                    <input id="predictPath" value="/api/predict" class="hidden" />
+                    <textarea id="predictBody" rows="12"></textarea>
+
+                    <div class="mt-14 inline predict-actions">
+                        <button class="primary" id="btnPredict">Execute</button>
+                        <button class="secondary hidden" id="btnFillPredict" type="button">Example Value</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="card tab-panel hidden" id="tab-stats">
+            <h3>Stats</h3>
+
+            <div class="inline">
+                <button class="primary" id="btnStats">GET /api/stats</button>
+                <button class="secondary hidden" id="btnHealth" type="button">GET /actuator/health</button>
+            </div>
+
+            <div class="muted mt-10"></div>
+        </div>
+    </div>
+
+    <h3 class="response-title">Resposta</h3>
+    <pre id="out">{}</pre>
+</div>
+
+<script src="./app.js"></script>
+</body>
+</html>

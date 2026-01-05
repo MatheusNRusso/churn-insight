@@ -9,13 +9,11 @@ import com.churninsight.api.error.InvalidCredentialsException;
 import com.churninsight.api.model.Account;
 import com.churninsight.api.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +30,7 @@ public class AuthService {
             throw new EmailAlreadyRegisteredException(dto.email());
         }
 
-        Account account = Account.builder()
+        var account = Account.builder()
                 .email(dto.email())
                 .password(passwordEncoder.encode(dto.password()))
                 .name(dto.name())
