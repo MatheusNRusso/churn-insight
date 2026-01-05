@@ -1,179 +1,185 @@
-# 📊 Churn Insight — API & ML Integration
+# 📊 Churn Insight — API, ML & Secure Integration
 
-Este projeto demonstra a **integração entre um serviço de Machine Learning e uma API backend**, com foco em **arquitetura, comunicação entre serviços e separação de responsabilidades**.
+Este projeto demonstra a **integração entre um serviço de Machine Learning e uma API backend**, com foco em **arquitetura, comunicação entre serviços, segurança, observabilidade e separação de responsabilidades**.
 
-O objetivo é apresentar, de forma didática, como um modelo de predição pode ser disponibilizado como serviço e consumido por uma API Java em um cenário próximo ao mundo real.
+O objetivo é apresentar, de forma **didática e progressiva**, como um modelo de predição pode ser disponibilizado como serviço, consumido por uma API Java, protegido por autenticação e validado por meio de métricas e uma interface de apoio.
 
 ---
 
 ## 🧠 Conceito do Projeto
 
-O projeto é dividido em **dois serviços independentes**:
+O projeto é dividido em **dois serviços independentes**, organizados em um **monorepo**:
 
-- **ML Service (Python / FastAPI)**
-  Responsável por carregar o pipeline/modelo treinado e executar a predição.
+* **ML Service (Python / FastAPI)**
+  Responsável por carregar o pipeline/modelo treinado e executar a inferência.
 
-- **API Backend (Java / Spring Boot)**
-  Responsável por receber requisições externas, encaminhar os dados ao serviço de ML e
-  retornar a resposta ao cliente de forma padronizada.
+* **API Backend (Java / Spring Boot)**
+  Responsável por:
+  * validar dados de entrada
+  * aplicar regras de negócio
+  * autenticar usuários (JWT)
+  * encaminhar requisições ao serviço de ML
+  * retornar respostas padronizadas ao cliente
 
 Essa separação permite:
-- desacoplamento entre backend e machine learning
-- manutenção e evolução independentes
-- integração via HTTP, como em ambientes produtivos
+* desacoplamento entre backend e machine learning
+* evolução independente dos serviços
+* integração via HTTP, como em ambientes produtivos
+* maior controle de erros, métricas e segurança
 
 ---
 
 ## 🏗️ Arquitetura Geral
 
+```text
+Client
+  ↓
+Spring Boot API (Java)
+  ↓
+ML Service (Python / FastAPI)
+  ↓
+Prediction Result
 ```
 
-Client
-↓
-Spring Boot API (Java)
-↓
-ML Service (Python / FastAPI)
-↓
-Prediction Result
-
-````
-
-- A API Java **não executa lógica de ML**
-- Toda a inferência ocorre no serviço Python
-- A API atua como camada de orquestração e exposição
+* A API Java **não executa lógica de Machine Learning**
+* Toda a inferência ocorre no serviço Python
+* A API atua como camada de **orquestração, segurança e observabilidade**
 
 ---
 
 ## 📁 Estrutura do Repositório
 
-```txt
+```text
 churn-insight/
-├── api-java/
-│   ├── src/main/java/com/churninsight/api
-│   │   ├── controller/       # Endpoints REST
-│   │   ├── service/          # Camada de orquestração
-│   │   ├── client/           # Cliente HTTP para o ML Service
-│   │   ├── dto/              # DTOs de entrada e saída
-│   │   ├── mapper/           # Conversões DTO ↔ Model
-│   │   ├── model/            # Modelos de domínio
-│   │   │   └── enums/        # Enumerações da aplicação
-│   │   ├── config/           # Configurações (ex: WebClient)
-│   │   └── util/             # Utilitários
-│   │
-│   ├── src/main/resources
-│   │   └── application.properties
-│   │
-│   ├── src/test/             # Testes automatizados
-│   ├── pom.xml               # Dependências e build
-│   └── README.md             # Documentação da API
-│
-└── ml-service-python/
-    ├── app/
-    │   ├── main.py            # Entrypoint FastAPI
-    │   ├── model_loader.py    # Carregamento do modelo
-    │   ├── schemas.py         # Schemas de request/response
-    │   └── settings.py        # Configurações do serviço
-    │
-    ├── notebooks/             # Experimentos e artefatos de ML
-    ├── requirements.txt       # Dependências Python
-    └── README.md              # Documentação do ML Service
-````
+├── api-java/                 # API Backend (Spring Boot)
+├── ml-service-python/        # Serviço de ML (FastAPI)
+└── docs/                     # Documentação técnica detalhada
+```
 
 ---
 
-## 🔁 Exemplos de Requisição e Resposta
+## 🚀 Features implementadas (evolução progressiva)
 
-A API recebe os dados do cliente, encaminha para o **ML Service** e retorna a predição de churn.
+As funcionalidades foram implementadas **por etapas**, cada uma isolada em branches específicas, seguindo boas práticas de versionamento e evolução incremental.
 
-### 📥 Exemplo 1 — Cliente com **Alta probabilidade de Churn**
+---
 
-**Requisição (POST)**
-`/predictions`
+### 1️⃣ Tratamento global de erros e validações
 
-```json
-{
-  "gender": "FEMALE",
-  "seniorCitizen": true,
-  "partner": true,
-  "dependents": true,
-  "contractMonths": 2,
-  "phoneService": true,
-  "multipleLines": "NO",
-  "internetService": "FIBER_OPTIC",
-  "onlineSecurity": "NO",
-  "onlineBackup": "NO",
-  "deviceProtection": "NO",
-  "techSupport": "NO",
-  "streamingTV": "NO",
-  "streamingMovies": "NO",
-  "contractType": "MONTH_TO_MONTH",
-  "paperlessBilling": true,
-  "paymentMethod": "ELECTRONIC_CHECK",
-  "monthlyCharges": 49.99,
-  "totalCharges": 89.99
-}
+* Contrato de erro padronizado
+* Validação de campos (DTOs)
+* Identificação de requisições via `requestId`
+* Separação clara entre erros de validação, JSON inválido e falhas internas
+
+📄 Documentação completa:
+👉 `docs/api-error-examples.md`
+
+---
+
+### 2️⃣ Endpoint de métricas (Stats)
+
+* Endpoint dedicado para métricas internas da API
+* Contabilização de:
+
+  * requisições
+  * predições bem-sucedidas
+  * erros de validação
+  * erros de JSON
+  * falhas do serviço de ML
+* Métricas mantidas em memória, sem acoplamento aos controllers
+
+📄 Documentação completa:
+👉 `docs/stats-endpoint.md`
+
+---
+
+### 3️⃣ Autenticação e autorização (JWT)
+
+* Cadastro de usuários (Register)
+* Login com geração de **JWT**
+* Proteção de rotas sensíveis
+* Uso de `Authorization: Bearer <token>`
+* Senhas armazenadas de forma criptografada
+
+📄 Documentação completa:
+👉 `docs/auth-endpoints.md`
+
+---
+
+### 4️⃣ UI Dashboard (Auth + Predict + Stats)
+
+Dashboard web simples (HTML/CSS/JS), servido diretamente pelo Spring Boot, com foco em **visualização e testes manuais** da API.
+
+Permite:
+
+* Register de usuários
+* Login e uso do token JWT
+* Execução de predições
+* Consulta das métricas (Stats)
+
+🌐 Acesso local:
+`http://localhost:8080/ui/index.html`
+
+📄 Documentação:
+👉 `docs/ui-dashboard.md`
+
+> O dashboard é propositalmente simples, sem frameworks, e serve como ferramenta de demonstração e apoio durante desenvolvimento e apresentações.
+
+---
+
+## 🔮 Predict — Exemplo rápido (Request / Response)
+
+A API recebe os dados do cliente, valida o payload e encaminha a requisição ao **ML Service (Python)** para execução da inferência.
+
+### 📥 Request (POST)
+
+`/api/predict`
+
+```bash
+curl -i -X POST http://localhost:8080/api/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "gender": "FEMALE",
+    "seniorCitizen": true,
+    "partner": true,
+    "dependents": true,
+    "contractMonths": 72,
+    "phoneService": true,
+    "multipleLines": "NO",
+    "internetService": "DSL",
+    "onlineSecurity": "NO",
+    "onlineBackup": "NO",
+    "deviceProtection": "NO",
+    "techSupport": "NO",
+    "streamingTV": "NO",
+    "streamingMovies": "NO",
+    "contractType": "MONTH_TO_MONTH",
+    "paperlessBilling": true,
+    "paymentMethod": "ELECTRONIC_CHECK",
+    "monthlyCharges": 89.99,
+    "totalCharges": 1000.00
+  }'
 ```
 
-**Resposta**
+### 📤 Response (200 OK)
 
 ```json
 {
   "id": 1,
-  "prediction": "Churn",
-  "probability": 0.6115
-}
-```
-
-📌 **Interpretação**
-Cliente com maior risco de cancelamento (*churn*), conforme a predição retornada.
-
----
-
-### 📥 Exemplo 2 — Cliente com **Baixa probabilidade de Churn**
-
-**Requisição (POST)**
-`/predictions`
-
-```json
-{
-  "gender": "MALE",
-  "seniorCitizen": false,
-  "partner": true,
-  "dependents": false,
-  "contractMonths": 36,
-  "phoneService": true,
-  "multipleLines": "YES",
-  "internetService": "DSL",
-  "onlineSecurity": "YES",
-  "onlineBackup": "YES",
-  "deviceProtection": "YES",
-  "techSupport": "YES",
-  "streamingTV": "YES",
-  "streamingMovies": "YES",
-  "contractType": "TWO_YEAR",
-  "paperlessBilling": false,
-  "paymentMethod": "CREDIT_CARD",
-  "monthlyCharges": 79.99,
-  "totalCharges": 2879.64
-}
-```
-
-**Resposta**
-
-```json
-{
-  "id": 2,
   "prediction": "No Churn",
-  "probability": 0.0872
+  "probability": 0.2947
 }
 ```
 
 📌 **Interpretação**
-Cliente com baixa probabilidade de churn, indicando maior retenção.
+Cliente com menor probabilidade de churn, conforme a inferência retornada pelo modelo.
+
+> Para exemplos completos, incluindo erros `400`, JSON inválido e `500`, consulte:
+> 👉 `docs/api-error-examples.md`
 
 ---
 
-## ▶️ Execução Local (Visão Geral)
+## ▶️ Execução Local
 
 ### ML Service (Python)
 
@@ -187,26 +193,44 @@ uvicorn app.main:app --port 8000
 
 ```bash
 cd api-java
-mvn spring-boot:run
+./mvnw spring-boot:run
+```
+
+### UI Dashboard
+
+```text
+http://localhost:8080/ui/index.html
 ```
 
 ---
 
-## 🎯 O que este projeto ensina
+## 🎯 O que este projeto demonstra
 
-* Integração entre backend e machine learning
+* Integração real entre Backend e Machine Learning
 * Comunicação entre serviços via HTTP
+* Autenticação JWT em APIs REST
+* Tratamento global de erros
+* Observabilidade básica (stats)
+* Organização em **monorepo**
+* Evolução incremental por feature branches
 * Separação clara de responsabilidades
-* Organização de projetos em formato **monorepo**
-* Arquitetura aplicável a cenários reais
 
 ---
 
 ## 🧪 Contexto
 
 Projeto desenvolvido no contexto de um **Hackathon**, com foco em aprendizado,
-colaboração e aplicação de boas práticas de engenharia.
+colaboração e aplicação de boas práticas de engenharia de software.
 
 ---
+
+## 📚 Documentação Técnica
+
+Toda a documentação detalhada está disponível na pasta `docs/`:
+
+* `api-error-examples.md`
+* `stats-endpoint.md`
+* `auth-endpoints.md`
+* `ui-dashboard.md`
 
 
