@@ -1,172 +1,149 @@
-# 🧠 Churn Insight API (Java)
+# 📊 Churn Insight — API, ML & Secure Integration
 
-API em **Java / Spring Boot** desenvolvida para o **Hackathon ONE**, responsável por expor o endpoint de predição de churn e **orquestrar a chamada** para um **microserviço de Machine Learning (Python)**.
+Este projeto demonstra a **integração entre um serviço de Machine Learning e uma API backend**, com foco em **arquitetura, comunicação entre serviços, segurança, observabilidade e separação de responsabilidades**.
 
-✅ **Status atual:**  
-A predição **já é realizada pelo ML Service Python**, consumida via `MlPredictionClient`.  
-A API Java atua exclusivamente como **camada de contrato, validação e orquestração**, mantendo **baixo acoplamento** com a camada de Machine Learning.
-
-> Esta API **não gera datasets**, **não treina modelos** e **não contém scripts de Data Science**.
+O objetivo é apresentar, de forma **didática e progressiva**, como um modelo de predição pode ser disponibilizado como serviço, consumido por uma API Java, protegido por autenticação e validado por meio de métricas e uma interface de apoio.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🧠 Conceito do Projeto
 
-- Java 17  
-- Spring Boot 3  
-- Maven  
-- H2 Database (in-memory – MVP)  
-- MapStruct  
-- Lombok  
-- Springdoc OpenAPI (Swagger)  
+O projeto é dividido em **dois serviços independentes**, organizados em um **monorepo**:
+
+* **ML Service (Python / FastAPI)**  
+  Responsável por carregar o pipeline/modelo treinado e executar a inferência.
+
+* **API Backend (Java / Spring Boot)**  
+  Responsável por:
+  * validar dados de entrada
+  * aplicar regras de negócio
+  * autenticar usuários (JWT)
+  * encaminhar requisições ao serviço de ML
+  * retornar respostas padronizadas ao cliente
+
+Essa separação permite:
+* desacoplamento entre backend e machine learning
+* evolução independente dos serviços
+* integração via HTTP, como em ambientes produtivos
+* maior controle de erros, métricas e segurança
 
 ---
 
-## 🧩 Arquitetura
+## 🏗️ Arquitetura Geral
 
-A API Java foi projetada seguindo princípios de **separação de responsabilidades**:
-
-- Contrato REST público
-- Validação dos dados de entrada
-- Orquestração da chamada ao ML Service
-- Padronização da resposta
-
-Integração entre serviços via **HTTP + JSON**, permitindo deploy e evolução independentes:
-
+```text
+Client
+  ↓
+Spring Boot API (Java)
+  ↓
+ML Service (Python / FastAPI)
+  ↓
+Prediction Result
 ```
 
-Client → API Java (/api/predict) → ML Service Python (/predict)
-
-```
-
----
-
-## 📌 Estrutura do Projeto
-
-```
-
-src/main/java/com/churninsight/api
-├── client            → MlPredictionClient
-├── config            → WebClientConfig
-├── controller        → PredictionController
-├── dto               → CustomerInputDto, PredictionResponseDto
-├── mapper            → PredictionMapper
-├── model             → PredictionModel
-│   └── enums         → Gender, ContractType, PaymentMethod, etc.
-├── service           → PredictionService
-└── util              → PredictionUtils (legado / referência)
-
-````
-
-> A camada `util` contém apenas lógica **histórica/de referência**.  
-> O cálculo efetivo de churn é realizado pelo **ML Service Python**.
+* A API Java **não executa lógica de Machine Learning**
+* Toda a inferência ocorre no serviço Python
+* A API atua como camada de **orquestração, segurança e observabilidade**
 
 ---
 
-## 🔮 Endpoint Principal
+## 📁 Estrutura do Repositório
 
-### **POST /api/predict**
-
-Recebe os dados de um cliente e retorna a previsão de churn.
-
-A API Java repassa a requisição ao ML Service Python e retorna a resposta padronizada ao cliente.
-
----
-
-## 📥 Contrato de Requisição — Exemplo (Alto risco de churn)
-
-```json
-{
-  "gender": "FEMALE",
-  "seniorCitizen": true,
-  "partner": true,
-  "dependents": true,
-  "contractMonths": 2,
-  "phoneService": true,
-  "multipleLines": "NO",
-  "internetService": "DSL",
-  "onlineSecurity": "NO",
-  "onlineBackup": "NO",
-  "deviceProtection": "NO",
-  "techSupport": "NO",
-  "streamingTV": "NO",
-  "streamingMovies": "NO",
-  "contractType": "MONTH_TO_MONTH",
-  "paperlessBilling": true,
-  "paymentMethod": "ELECTRONIC_CHECK",
-  "monthlyCharges": 49.99,
-  "totalCharges": 89.99
-}
-````
-
-### 📤 Contrato de Resposta
-
-```json
-{
-  "id": 1,
-  "prediction": "Churn",
-  "probability": 0.527
-}
+```text
+churn-insight/
+├── api-java/                 # API Backend (Spring Boot)
+├── ml-service-python/        # Serviço de ML (FastAPI)
+└── docs/                     # Documentação técnica detalhada
 ```
 
 ---
 
-## 🔗 Integração com o ML Service
+## 🚀 Features implementadas (evolução progressiva)
 
-A comunicação com o serviço de Machine Learning ocorre através de `MlPredictionClient`, configurado via `WebClient`.
-
-Configuração recomendada por ambiente:
-
-* **Desenvolvimento local**
-  `ML_SERVICE_URL=http://localhost:8000`
-
-* **Docker / Compose**
-  `ML_SERVICE_URL=http://ml-service:8000`
-
-> A URL do ML Service deve ser configurada em `application.properties` ou `application.yml`.
+As funcionalidades foram implementadas **por etapas**, cada uma isolada em branches específicas, seguindo boas práticas de versionamento e evolução incremental.
 
 ---
 
-## 🔧 Como Executar (Desenvolvimento)
+### 1️⃣ Tratamento global de erros e validações
 
-### 1️⃣ Suba o ML Service Python
+* Contrato de erro padronizado
+* Validação de campos (DTOs)
+* Identificação de requisições via `requestId`
+* Separação clara entre erros de validação, JSON inválido e falhas internas
+
+📄 Documentação completa:
+👉 `docs/api-error-examples.md`
+
+---
+
+### 2️⃣ Endpoint de métricas (Stats)
+
+* Endpoint dedicado para métricas internas da API
+* Contabilização de:
+
+  * requisições
+  * predições bem-sucedidas
+  * erros de validação
+  * erros de JSON
+  * falhas do serviço de ML
+* Métricas mantidas em memória, sem acoplamento aos controllers
+
+📄 Documentação completa:
+👉 `docs/stats-endpoint.md`
+
+---
+
+### 3️⃣ Autenticação e autorização (JWT)
+
+* Cadastro de usuários (Register)
+* Login com geração de **JWT**
+* Proteção de rotas sensíveis
+* Uso de `Authorization: Bearer <token>`
+* Senhas armazenadas de forma criptografada
+
+📄 Documentação completa:
+👉 `docs/auth-endpoints.md`
+
+---
+
+### 4️⃣ UI Dashboard (Auth + Predict + Stats)
+
+Dashboard web simples (HTML/CSS/JS), servido diretamente pelo Spring Boot, com foco em **visualização e testes manuais** da API.
+
+Permite:
+
+* Register de usuários
+* Login e uso do token JWT
+* Execução de predições
+* Consulta das métricas (Stats)
+
+🌐 Acesso local:
+`http://localhost:8080/ui/index.html`
+
+📄 Documentação:
+👉 `docs/ui-dashboard.md`
+
+> O dashboard é propositalmente simples, sem frameworks, e serve como ferramenta de demonstração e apoio durante desenvolvimento e apresentações.
+
+---
+
+## 🔮 Predict — Exemplo rápido (Request / Response)
+
+A API recebe os dados do cliente, valida o payload e encaminha a requisição ao **ML Service (Python)** para execução da inferência.
+
+### 📥 Request (POST)
+
+`/api/predict`
 
 ```bash
-cd ../ml-service-python
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### 2️⃣ Suba a API Java
-
-```bash
-mvn spring-boot:run
-```
-
-API disponível em:
-
-```
-http://localhost:8080
-```
-
-Swagger UI:
-
-```
-http://localhost:8080/swagger-ui.html
-```
-
----
-
-## 🧪 Teste rápido com curl
-
-```bash
-curl -X POST "http://localhost:8080/api/predict" \
+curl -i -X POST http://localhost:8080/api/predict \
   -H "Content-Type: application/json" \
   -d '{
     "gender": "FEMALE",
     "seniorCitizen": true,
     "partner": true,
     "dependents": true,
-    "contractMonths": 2,
+    "contractMonths": 72,
     "phoneService": true,
     "multipleLines": "NO",
     "internetService": "DSL",
@@ -179,21 +156,82 @@ curl -X POST "http://localhost:8080/api/predict" \
     "contractType": "MONTH_TO_MONTH",
     "paperlessBilling": true,
     "paymentMethod": "ELECTRONIC_CHECK",
-    "monthlyCharges": 49.99,
-    "totalCharges": 89.99
+    "monthlyCharges": 89.99,
+    "totalCharges": 1000.00
   }'
+```
+
+### 📤 Response (200 OK)
+
+```json
+{
+  "id": 1,
+  "prediction": "No Churn",
+  "probability": 0.2947
+}
+```
+
+📌 **Interpretação**
+Cliente com menor probabilidade de churn, conforme a inferência retornada pelo modelo.
+
+> Para exemplos completos, incluindo erros `400`, JSON inválido e `500`, consulte:
+> 👉 `docs/api-error-examples.md`
+
+---
+
+## ▶️ Execução Local
+
+### ML Service (Python)
+
+```bash
+cd ml-service-python
+pip install -r requirements.txt
+uvicorn app.main:app --port 8000
+```
+
+### API Backend (Java)
+
+```bash
+cd api-java
+./mvnw spring-boot:run
+```
+
+### UI Dashboard
+
+```text
+http://localhost:8080/ui/index.html
 ```
 
 ---
 
-## 🧠 Papel da API na Arquitetura Geral
+## 🎯 O que este projeto demonstra
 
-* Interface pública do sistema
-* Validação e padronização
-* Orquestração de chamadas
-* Integração com Machine Learning
-* Evolução segura sem acoplamento com dados ou modelos
+* Integração real entre Backend e Machine Learning
+* Comunicação entre serviços via HTTP
+* Autenticação JWT em APIs REST
+* Tratamento global de erros
+* Observabilidade básica (stats)
+* Organização em **monorepo**
+* Evolução incremental por feature branches
+* Separação clara de responsabilidades
 
 ---
+
+## 🧪 Contexto
+
+Projeto desenvolvido no contexto de um **Hackathon**, com foco em aprendizado,
+colaboração e aplicação de boas práticas de engenharia de software.
+
+---
+
+## 📚 Documentação Técnica
+
+Toda a documentação detalhada está disponível na pasta `docs/`:
+
+* `api-error-examples.md`
+* `stats-endpoint.md`
+* `auth-endpoints.md`
+* `ui-dashboard.md`
+
 
 
